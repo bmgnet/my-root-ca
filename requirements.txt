@@ -1,0 +1,5 @@
+flask
+flask-login
+bcrypt
+markdown2
+dotenv
