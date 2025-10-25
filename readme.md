@@ -4,6 +4,8 @@ Dieses Projekt stellt eine interne Root-Zertifizierungsstelle (CA) bereit — au
 OpenSSL, Bash-Automatisierung und einer Python/Flask-basierten Verwaltungsoberfläche.
 Ideal für Homelabs, interne Server, Testumgebungen oder private Infrastrukturen.
 
+![CA Web UI Übersicht](doku/screen-01.png)
+
 ## 🎯 Ziele
 
 - Aufbau einer internen Root-CA mit OpenSSL
