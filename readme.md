@@ -169,7 +169,7 @@ YYYMMDD
 
 ---
 
-### 💡 Beispiel
+## 💡 Beispiel
 
 ## 🛠️ Skript: Server-Zertifikate ausstellen (`issue_server_cert.sh`)
 
@@ -182,14 +182,14 @@ Zertifikat für Server mit einem CN (Common Name) und einem SAN (Subject Alterna
 
 ## 💡  My Root CA vertrauen
 
-### Linux (Debian/Ubuntu):
+## Linux (Debian/Ubuntu):
 
 ```bash
 sudo cp ~/my-root-ca/ca/certs/ca.cert.pem /usr/local/share/ca-certificates/internal-ca.crt
 sudo update-ca-certificates
 ```
 
-### Windows:
+## Windows:
 
 ```
 Zertifikat `ca.cert.pem` in **"Vertrauenswürdige Stammzertifizierungsstellen"** importieren.
