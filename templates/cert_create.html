@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<h3>Neues Zertifikat erstellen</h3>
+<form method="post" class="mt-3">
+  <div class="form-group">
+    <label for="cn">Common Name (CN)</label>
+    <input type="text" class="form-control" id="cn" name="cn" placeholder="z. B. web01.bmgnet.loc" required>
+  </div>
+  <div class="form-group">
+    <label for="dns">DNS-Einträge (kommagetrennt)</label>
+    <input type="text" class="form-control" id="dns" name="dns" placeholder="z. B. web01.bmgnet.loc, www.bmgnet.loc">
+  </div>
+  <div class="form-group">
+    <label for="ips">IP-Adressen (kommagetrennt)</label>
+    <input type="text" class="form-control" id="ips" name="ips" placeholder="z. B. 192.168.0.10, 10.0.0.5">
+  </div>
+  <button type="submit" class="btn btn-success mt-3">Zertifikat erstellen</button>
+  <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Abbrechen</a>
+</form>
+{% endblock %}

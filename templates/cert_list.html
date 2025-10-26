@@ -1,0 +1,224 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h3 class="mb-3">Zertifikatsübersicht</h3>
+
+<!-- 🔹 Root CA Download-Bereich (nicht auto-hide) -->
+<div class="rootca-box alert alert-info d-flex justify-content-between align-items-center shadow-sm rounded">
+  <div>
+    <strong>Öffentliches Root-CA Zertifikat</strong><br>
+    Dieses Zertifikat kann von Clients oder Servern importiert werden, um der internen CA zu vertrauen.<br>
+    <small class="text-muted">(Der private Schlüssel wird niemals bereitgestellt.)</small>
+  </div>
+  <div>
+    <a href="{{ url_for('download_file', filename=root_cert) }}" class="btn btn-success btn-sm">
+      <i class="fas fa-download"></i> Root-CA herunterladen
+    </a>
+    <a href="{{ url_for('download_cert_index') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-file-alt"></i> Zertifikatsliste herunterladen
+    </a>
+    <a href="{{ url_for('serve_crl', filename='ca.crl.pem') }}" class="btn btn-outline-secondary btn-sm" target="_blank">
+      <i class="fas fa-file-alt"></i> Widerrufsliste (für Clients)
+    </a>
+  </div>
+</div>
+
+<!-- 🔹 Filterbuttons -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="mb-0">Zertifikate filtern:</h5>
+  <div>
+    <button class="btn btn-outline-primary btn-sm filter-btn active" data-filter="all">Alle</button>
+    <button class="btn btn-outline-success btn-sm filter-btn" data-filter="active">Aktive</button>
+    <button class="btn btn-outline-secondary btn-sm filter-btn" data-filter="archive">Archivierte</button>
+  </div>
+</div>
+
+<!-- 🔹 Tabelle -->
+<div class="card shadow">
+  <div class="card-header bg-primary text-white">
+    <h3 class="card-title mb-0"><i class="fas fa-certificate"></i> Zertifikatsübersicht</h3>
+  </div>
+  <div class="card-body">
+    <table id="certTable" class="table table-striped table-bordered table-hover w-100">
+      <thead class="table-light">
+        <tr>
+          <th>Common Name</th>
+          <th>Status</th>
+          <th>Erstellt</th>
+          <th>Ablauf</th>
+          <th>Seriennummer</th>
+          <th>SAN</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in certs %}
+        <tr data-source="{{ c.source }}" class="{% if c.status == 'E' %}table-danger{% elif c.status == 'R' %}table-warning{% endif %}">
+          <td><strong>{{ c.cn }}</strong></td>
+          <td>
+            {% if c.status == 'V' %}
+              <span class="badge bg-success">VALID</span>
+            {% elif c.status == 'E' %}
+              <span class="badge bg-danger">EXPIRED</span>
+            {% elif c.status == 'R' %}
+              <span class="badge bg-warning text-dark">REVOKED</span>
+            {% else %}
+              <span class="badge bg-secondary">UNKNOWN</span>
+            {% endif %}
+            {% if c.source == 'archive' %}
+              <span class="badge bg-secondary ms-1">Archiv</span>
+            {% endif %}
+          </td>
+          <td>{{ c.created or 'unbekannt' }}</td>
+          <td>{{ c.expire }}</td>
+          <td><code>{{ c.serial }}</code></td>
+          <td>{{ c.san }}</td>
+          <td>
+            {% if c.status == 'V' %}
+              <div class="btn-group btn-group-sm mb-2" role="group">
+                {% if c.variants %}
+                  {% for f in c.variants %}
+                    <a href="{{ url_for('download_file', filename=f.filename) }}" class="btn btn-outline-primary">{{ f.name }}</a>
+                  {% endfor %}
+                {% endif %}
+              </div><br>
+              <form action="{{ url_for('renew_cert', serial=c.serial) }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-success btn-sm">
+                  <i class="fas fa-sync-alt"></i> Renew
+                </button>
+              </form>
+              <form method="post" action="{{ url_for('revoke_cert', serial=c.serial) }}" style="display:inline;">
+                <button class="btn btn-sm btn-danger"
+                        type="submit"
+                        onclick="return confirm('Soll das Zertifikat {{ c.cn }} wirklich widerrufen werden?');">
+                  <i class="fas fa-ban"></i> Revoke
+                </button>
+              </form>
+
+              <button type="button" class="btn btn-primary btn-sm"
+                      data-bs-toggle="modal"
+                      data-bs-target="#certDetailsModal"
+                      data-serial="{{ c.serial }}">
+                <i class="fas fa-info-circle"></i> Details
+              </button>
+
+            {% elif c.status == 'R' %}
+              <span class="text-warning"><i class="fas fa-exclamation-triangle"></i> Zertifikat widerrufen</span>
+            {% elif c.status == 'E' %}
+              <span class="text-danger"><i class="fas fa-clock"></i> Zertifikat abgelaufen</span>
+            {% else %}
+              <span class="text-muted">Keine Aktion verfügbar</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const modal = document.getElementById("certDetailsModal");
+        modal.addEventListener("show.bs.modal", (event) => {
+          const button = event.relatedTarget;
+          const serial = button.getAttribute("data-serial");
+          const content = document.getElementById("certDetailsContent");
+
+          content.innerHTML = "<em class='text-muted'>Lade Zertifikatsdetails...</em>";
+
+          fetch(`/cert/details/${serial}`)
+            .then(response => {
+              if (!response.ok) throw new Error("Fehler beim Laden");
+              return response.text();
+            })
+            .then(data => content.innerHTML = data)
+            .catch(err => content.innerHTML = `<span class='text-danger'>${err}</span>`);
+        });
+      });
+    </script>
+
+  </div>
+</div>
+
+<!-- 🔹 Zertifikatsdetails Modal -->
+<div class="modal fade" id="certDetailsModal" tabindex="-1" aria-labelledby="certDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content shadow-lg">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="certDetailsModalLabel"><i class="fas fa-certificate"></i> Zertifikatsdetails</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Schließen"></button>
+      </div>
+      <div class="modal-body">
+        <div id="certDetailsContent" style="font-family: monospace; white-space: pre-wrap; max-height: 70vh; overflow-y: auto;">
+          <em class="text-muted">Lade Zertifikatsdetails...</em>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Schließen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .filter-btn.active { background-color: #0d6efd; color: #fff; }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+  $(function () {
+    // 🔹 Datumssortierung aktivieren
+    if ($.fn.dataTable && $.fn.dataTable.moment) {
+      $.fn.dataTable.moment('YYYY-MM-DD');
+      $.fn.dataTable.moment('YYYY-MM-DD HH:mm');
+    }
+
+    // 🔹 DataTable initialisieren
+    const table = $('#certTable').DataTable({
+      dom: "<'row'<'col-sm-6'l><'col-sm-6'f>>" + 
+       "<'row'<'col-sm-12'tr>>" + 
+       "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+      pageLength: 10,
+      order: [[2, 'desc']],
+      responsive: true,
+      language: {
+        lengthMenu: "Zeige _MENU_ Einträge pro Seite",
+        zeroRecords: "Keine Zertifikate gefunden",
+        info: "Seite _PAGE_ von _PAGES_",
+        infoEmpty: "Keine Einträge verfügbar",
+        infoFiltered: "(gefiltert von _MAX_ Einträgen)",
+        search: "Suche:",
+        paginate: {
+          first: "Erste",
+          last: "Letzte",
+          next: "Weiter",
+          previous: "Zurück"
+        }
+      }
+    });
+
+    // 🔹 Sucheingabe verschönern
+    $('#certTable_filter input')
+      .attr('placeholder', 'Suche in Zertifikaten…')
+      .addClass('form-control form-control-sm');
+
+    // 🔹 Custom-Filter (active / archive)
+    let currentFilter = 'all';
+    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+      if (settings.nTable !== document.getElementById('certTable')) return true;
+      if (currentFilter === 'all') return true;
+      const rowSource = $(table.row(dataIndex).node()).data('source');
+      return rowSource === currentFilter;
+    });
+
+    $('.filter-btn').on('click', function () {
+      $('.filter-btn').removeClass('active');
+      $(this).addClass('active');
+      currentFilter = $(this).data('filter');
+      table.draw();
+    });
+  });
+</script>
+{% endblock %}
+

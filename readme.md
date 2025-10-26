@@ -112,7 +112,7 @@ Ergänzend zu den CLI-Tools bietet die Web-App:
 
 ### 1️⃣ Installation
 ```bash
-git clone <repo-url> my-root-ca
+git clone https://github.com/bmgnet/my-root-ca.git
 cd my-root-ca
 cp config.env.example config.env
 python3 -m venv venv

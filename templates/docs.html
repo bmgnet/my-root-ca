@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-header bg-primary text-white">
+    📘 {{ title }}
+  </div>
+  <div class="card-body markdown-body">
+    {{ content|safe }}
+  </div>
+  <div class="card-footer text-end">
+    <a href="{{ url_for('download_doc', doc_id=title|lower|replace(' ', '_')) }}" 
+      class="btn btn-outline-secondary btn-sm">
+      <i class="fas fa-download"></i> Markdown herunterladen
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+

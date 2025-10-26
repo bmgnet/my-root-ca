@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ title or "CA Dashboard" }}</title>
+
+    <!-- 🔹 Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminlte/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminlte/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminlte/css/datatables.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminlte/font-awesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='adminlte/css/github-markdown-light.css') }}">
+
+    <style>
+    .markdown-body {
+      padding: 1rem;
+    }
+    </style>
+
+    <style>
+      body.login-page {
+        background-color: #f4f6f9;
+      }
+      .alert {
+        transition: opacity 0.5s ease;
+      }
+    </style>
+  </head>
+
+  <body class="{% if request.endpoint == 'login' %}login-page{% else %}hold-transition sidebar-mini{% endif %}">
+    
+    {% if request.endpoint != 'login' %}
+    <!-- 🔹 Navbar nur anzeigen, wenn man nicht auf der Login-Seite ist -->
+    <nav class="main-header navbar navbar-expand navbar-light bg-light border-bottom">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a href="{{ url_for('dashboard') }}" class="nav-link">🏠 Übersicht</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('create_cert') }}" class="nav-link">➕ Neues Zertifikat</a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('change_password') }}" class="nav-link">
+            <i class="fas fa-key"></i> Passwort ändern
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ url_for('logout') }}" class="nav-link text-danger">🚪 Abmelden</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="docsDropdown" role="button"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-book"></i> Dokumentation
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="docsDropdown">
+            {% for doc in docs_menu %}
+              <li><a class="dropdown-item" href="{{ url_for('show_doc', doc_id=doc.id) }}">
+                📄 {{ doc.title }}
+              </a></li>
+            {% else %}
+              <li><span class="dropdown-item text-muted">Keine Dokumente vorhanden</span></li>
+            {% endfor %}
+          </ul>
+        </li>
+
+      </ul>
+    </nav>
+    {% endif %}
+
+    <!-- 🔹 Hauptinhalt -->
+    <div class="{% if request.endpoint == 'login' %}container mt-5{% else %}content-wrapper p-4{% endif %}">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- 🔹 Flash-Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div id="flash-container" class="container mt-3">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- 🔹 Scripts (Reihenfolge ist wichtig!) -->
+    <script src="{{ url_for('static', filename='adminlte/js/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='adminlte/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='adminlte/js/datatables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='adminlte/js/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='adminlte/js/datetime-moment.js') }}"></script>
+    <script src="{{ url_for('static', filename='adminlte/js/adminlte.min.js') }}"></script>
+
+    <!-- 🔹 Flash-Alerts automatisch ausblenden -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        const timeout = {{ ALERT_TIMEOUT_MS | default(4000) }};
+        const alerts = document.querySelectorAll("#flash-container .alert");
+        alerts.forEach((alert) => {
+          setTimeout(() => {
+            alert.classList.remove("show");
+            alert.style.opacity = "0";
+          }, timeout);
+          setTimeout(() => alert.remove(), timeout + 1000);
+        });
+      });
+    </script>
+
+    <!-- 🔹 Platz für Seitenspezifische JS (z. B. cert_list.html) -->
+    {% block scripts %}{% endblock %}
+  </body>
+</html>
