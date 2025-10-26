@@ -197,3 +197,41 @@ sudo update-ca-certificates
 Zertifikat `ca.cert.pem` in **"Vertrauenswürdige Stammzertifizierungsstellen"** importieren.
 ```
 
+---
+
+## 📦 Third-Party Components
+
+
+### 🧩 jQuery 3.7.1
+- **Website:** [https://jquery.com/](https://jquery.com/)  
+- **Lizenztext:** [https://jquery.org/license/](https://jquery.org/license/)
+
+---
+
+### 🧩 Bootstrap 5.1.3
+- **Website:** [https://getbootstrap.com/](https://getbootstrap.com/)  
+- **Lizenztext:** [https://github.com/twbs/bootstrap/blob/main/LICENSE](https://github.com/twbs/bootstrap/blob/main/LICENSE)
+
+---
+
+### 🧩 DataTables
+- **Website:** [https://datatables.net/](https://datatables.net/)  
+- **Lizenztext:** [https://datatables.net/license/mit](https://datatables.net/license/mit)
+
+---
+
+### 🧩 Moment.js
+- **Website:** [https://momentjs.com/](https://momentjs.com/)  
+- **Lizenztext:** [https://github.com/moment/moment/blob/develop/LICENSE](https://github.com/moment/moment/blob/develop/LICENSE)
+
+---
+
+### 🧩 AdminLTE 4.0.0-rc4
+- **Website:** [https://github.com/ColorlibHQ/AdminLTE](https://github.com/ColorlibHQ/AdminLTE)  
+- **Lizenztext:** [https://github.com/ColorlibHQ/AdminLTE/blob/master/LICENSE](https://github.com/ColorlibHQ/AdminLTE/blob/master/LICENSE)
+
+---
+
+### 🧩 Font Awesome Free 7.1.0
+- **Website:** [https://fontawesome.com/](https://fontawesome.com/)  
+- **Lizenztext:** [https://fontawesome.com/license/free](https://fontawesome.com/license/free)
