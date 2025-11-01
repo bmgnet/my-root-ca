@@ -27,9 +27,15 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h5 class="mb-0">Zertifikate filtern:</h5>
   <div>
-    <button class="btn btn-outline-primary btn-sm filter-btn active" data-filter="all">Alle</button>
+   <!-- <button class="btn btn-outline-primary btn-sm filter-btn active" data-filter="all">Alle</button>
     <button class="btn btn-outline-success btn-sm filter-btn" data-filter="active">Aktive</button>
-    <button class="btn btn-outline-secondary btn-sm filter-btn" data-filter="archive">Archivierte</button>
+    <button class="btn btn-outline-secondary btn-sm filter-btn" data-filter="archive">Archivierte</button> -->
+<select id="certFilter" class="form-select form-select-sm" style="width: 160px;">
+    <option value="active">Aktive</option>
+    <option value="archive">Archivierte</option>
+    <option value="all">Alle</option>
+</select>
+
   </div>
 </div>
 
@@ -204,18 +210,30 @@
       .addClass('form-control form-control-sm');
 
     // 🔹 Custom-Filter (active / archive)
-    let currentFilter = 'all';
+    let currentFilter = localStorage.getItem("certFilter") || "active";
+
     $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
       if (settings.nTable !== document.getElementById('certTable')) return true;
-      if (currentFilter === 'all') return true;
+
       const rowSource = $(table.row(dataIndex).node()).data('source');
-      return rowSource === currentFilter;
+
+      if (currentFilter === "all") return true;
+      if (currentFilter === "active") return rowSource !== "archive";
+      if (currentFilter === "archive") return rowSource === "archive";
+
+      return true;
     });
 
-    $('.filter-btn').on('click', function () {
-      $('.filter-btn').removeClass('active');
-      $(this).addClass('active');
-      currentFilter = $(this).data('filter');
+    // Dropdown setzen
+    $("#certFilter").val(currentFilter);
+
+    // Tabelle initial zeichnen
+    table.draw();
+
+    // Dropdown Listener
+    $("#certFilter").on("change", function () {
+      currentFilter = $(this).val();
+      localStorage.setItem("certFilter", currentFilter);
       table.draw();
     });
   });
